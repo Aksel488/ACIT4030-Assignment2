@@ -1,2 +1,12 @@
 Data downloaded from:
 https://www.kaggle.com/datasets/balraj98/modelnet10-princeton-3d-object-dataset
+
+
+installation python >= 3.9:
+pip install tensorflow
+pip install numpy
+pip install pyglet
+pip install trimesh
+pip install matplotlib
+pip install 
+pip install 
