@@ -1,5 +1,19 @@
 import os
-import sys
+import trimesh
+import tensorflow as tf
+
+def download_modelnet10():
+    dataset_path = os.path.dirname(__file__)
+
+    DATA_DIR = tf.keras.utils.get_file(
+        "modelnet.zip",
+        "http://3dvision.princeton.edu/projects/2014/3DShapeNets/ModelNet10.zip",
+        extract=True,
+        cache_dir=dataset_path
+    )
+    DATA_DIR = os.path.join(os.path.dirname(DATA_DIR), "ModelNet10")
+
+    return DATA_DIR
 
 # function from: https://davidstutz.de/visualizing-triangular-meshes-from-off-files-using-python-occmodel/
 def read_off(file):
@@ -51,3 +65,22 @@ def read_off(file):
             faces.append(face)
 
         return vertices, faces
+
+def show_mesh(mesh_path, color=[], random_color=False):
+    '''
+    Loads a mesh file, colors and shows it
+
+    color: RGBA array of values
+    random_colors: Boolean if faces should be randomly colored
+    '''
+    mesh = trimesh.load(mesh_path)
+
+    if color:
+        for facet in mesh.facets:
+            mesh.visual.face_colors[facet] = color
+
+    if random_color:
+        for facet in mesh.facets:
+            mesh.visual.face_colors[facet] = trimesh.visual.random_color()
+    
+    mesh.show()
