@@ -1,6 +1,7 @@
 import os
 import trimesh
 import tensorflow as tf
+import matplotlib.pyplot as plt
 
 def download_modelnet10():
     dataset_path = os.path.dirname(__file__)
@@ -84,3 +85,31 @@ def show_mesh(mesh_path, color=[], random_color=False):
             mesh.visual.face_colors[facet] = trimesh.visual.random_color()
     
     mesh.show()
+    
+    
+    
+    
+def save_plots(history, model_name):
+    """
+    Function for plotting and saving accuracy and loss of a model.
+    """
+    img_save_path = os.path.join('models', 'plots')
+    if not os.path.exists(img_save_path):
+        os.makedirs(img_save_path)
+    
+    plt.plot(history.history['accuracy'])
+    plt.title('Model accuracy')
+    plt.ylabel('accuracy')
+    plt.xlabel('epoch')
+    plt.savefig(f'{img_save_path}/{model_name}_accuracy.png')
+    plt.clf()
+    
+    plt.plot(history.history['loss'])
+    plt.title('Model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.savefig(f'{img_save_path}/{model_name}_loss.png')
+    
+def myprint(s, model_name):
+    with open(f'{model_name}_summary.txt','a') as f:
+        print(s, file=f)
