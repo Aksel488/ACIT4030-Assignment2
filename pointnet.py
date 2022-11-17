@@ -10,46 +10,15 @@ from tensorflow.keras.layers import (
     Conv1D, BatchNormalization, Activation, Dense, 
     GlobalMaxPooling1D, Dot, Reshape, Input, Dropout
 )
+from utils import save_plots, myprint, download_modelnet10
 
 NUM_POINTS = 2048
 NUM_CLASSES = 10
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EPOCHS = 30
-DATA_DIR = tf.keras.utils.get_file(
-    "modelnet.zip",
-    "http://3dvision.princeton.edu/projects/2014/3DShapeNets/ModelNet10.zip",
-    extract=True,
-)
-DATA_DIR = os.path.join(os.path.dirname(DATA_DIR), "ModelNet10")
-
-
-def save_plots(history):
-    """
-    Function for plotting and saving accuracy and loss of a model.
-    """
-    img_save_path = os.path.join('models', 'plots')
-    if not os.path.exists(img_save_path):
-        os.makedirs(img_save_path)
-    
-    plt.plot(history.history['accuracy'])
-    plt.title('Model accuracy')
-    plt.ylabel('accuracy')
-    plt.xlabel('epoch')
-    plt.savefig(img_save_path + '/pointnet_accuracy.png')
-    plt.clf()
-    
-    plt.plot(history.history['loss'])
-    plt.title('Model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.savefig(img_save_path + '/pointnet_loss.png')
-
-
-def myprint(s):
-    with open('pointnet_summary.txt','a') as f:
-        print(s, file=f)
-        
+DATA_DIR = download_modelnet10()
+ 
 
 def parse_dataset(data_path, num_points=2048):
     train_points = []
@@ -171,9 +140,10 @@ def create_pointnet(summary=False):
     model = Model(inputs=inputs, outputs=outputs, name="pointnet")
     
     if summary:
-        model.summary(print_fn=myprint)
+        model.summary(print_fn=myprint(model_name='pointnet'))
         
     return model
+
 
 def main():
     if not os.path.exists('models'):
@@ -183,7 +153,7 @@ def main():
     if not os.path.exists(pointnet_model_path):
         os.makedirs(pointnet_model_path)
     
-    train_points, test_points, train_labels, test_labels, CLASS_MAP = parse_dataset(DATA_DIR, NUM_POINTS)
+    train_points, test_points, train_labels, test_labels, class_map = parse_dataset(DATA_DIR, NUM_POINTS)
     train_dataset, test_dataset = transform_to_tf_dataset(train_points, test_points, train_labels, test_labels)
     
     model = create_pointnet()
@@ -209,7 +179,7 @@ def main():
         callbacks=[callbacks]
     )
     
-    save_plots(history)
+    save_plots(history, 'pointnet')
 
 if __name__ == "__main__":
     main()
