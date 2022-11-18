@@ -17,7 +17,6 @@ NUM_CLASSES = 10
 BATCH_SIZE = 32
 LEARNING_RATE = 0.001
 EPOCHS = 30
-DATA_DIR = download_modelnet10()
  
 
 def parse_dataset(data_path, num_points=2048):
@@ -146,6 +145,8 @@ def create_pointnet(summary=False):
 
 
 def main():
+    DATA_DIR = download_modelnet10()
+    
     if not os.path.exists('models'):
         os.makedirs('models')
         

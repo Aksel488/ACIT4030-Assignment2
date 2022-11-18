@@ -1,4 +1,3 @@
-import time
 import os
 import glob
 import trimesh
@@ -14,8 +13,6 @@ from tensorflow.keras.layers import (
 from utils import save_plots, myprint, download_modelnet10
 
 
-
-DATA_DIR = download_modelnet10()
 LEARNING_RATE_CLASSIFIER = 1e-3
 BATCH_SIZE = 32
 EPOCHS = 10
@@ -119,6 +116,8 @@ def voxel_classifier():
 
 
 def main():
+    DATA_DIR = download_modelnet10()
+    
     if not os.path.exists('models'):
         os.makedirs('models')
         
