@@ -4,6 +4,7 @@ import numpy as np
 import glob
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import json 
 from tensorflow.keras.models import Model
 from tensorflow.keras.regularizers import Regularizer
 from tensorflow.keras.layers import (
@@ -24,6 +25,7 @@ def parse_dataset(data_path, num_points=2048):
     train_labels = []
     test_points = []
     test_labels = []
+    all_test_files = []
     class_map = {}
     folders = glob.glob(os.path.join(data_path, "[!README]*"))
 
@@ -42,6 +44,7 @@ def parse_dataset(data_path, num_points=2048):
         for f in test_files:
             test_points.append(trimesh.load(f).sample(num_points))
             test_labels.append(i)
+            all_test_files.append(f)
 
     return (
         np.array(train_points),
@@ -49,6 +52,7 @@ def parse_dataset(data_path, num_points=2048):
         np.array(train_labels),
         np.array(test_labels),
         class_map,
+        all_test_files
     )
     
     
@@ -154,7 +158,7 @@ def main():
     if not os.path.exists(pointnet_model_path):
         os.makedirs(pointnet_model_path)
     
-    train_points, test_points, train_labels, test_labels, class_map = parse_dataset(DATA_DIR, NUM_POINTS)
+    train_points, test_points, train_labels, test_labels, class_map, test_files = parse_dataset(DATA_DIR, NUM_POINTS)
     train_dataset, test_dataset = transform_to_tf_dataset(train_points, test_points, train_labels, test_labels)
     
     model = create_pointnet()
@@ -180,7 +184,23 @@ def main():
         callbacks=[callbacks]
     )
     
-    save_plots(history, 'pointnet')
+    #save_plots(history, 'pointnet')
+    
+    # predictions = model.predict(test_points)
+    # np.savetxt("score_pointnetPointNet.csv", predictions, delimiter=",")
+    
+    preds = model.predict(test_points)
+    predictions_dict = {"file_name": [], "predictions": []}
+    
+    i = 0
+    for sample in test_files:
+        predictions_dict['file_name'].append(os.path.basename(sample))
+        predictions_dict['predictions'].append(preds[i].tolist())
+        i += 1
+    
+    
+    with open('pointPred.json', 'w') as outfile:
+        json.dump(predictions_dict, outfile)
 
 if __name__ == "__main__":
     main()

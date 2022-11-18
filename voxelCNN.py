@@ -1,8 +1,10 @@
 import os
 import glob
 import trimesh
+import pyvista as pv
 import numpy as np 
 import tensorflow as tf
+import json
 from tensorflow.keras import Input
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.layers import (
@@ -19,11 +21,28 @@ EPOCHS = 10
 N_CLASSES = 10
     
     
+def load_data():
+    '''
+    function for loading data from the training data and returning it as a Dataset
+    '''
+    data = np.load("modelnet10.npz", allow_pickle=True)
+    train_voxel = data["train_voxel"] # Training 3D voxel samples
+    test_voxel = data["test_voxel"] # Test 3D voxel samples
+    train_labels = data["train_labels"] # Training labels (integers from 0 to 9)
+    test_labels = data["test_labels"] # Test labels (integers from 0 to 9)
+    class_map = data["class_map"] # Dictionary mapping the labels to their class names.
+    
+    return train_voxel, test_voxel, train_labels, test_labels, class_map
+
+
+
+    
 def parse_dataset(data_path):
-    train_points = []
+    train_voxel = []
     train_labels = []
-    test_points = []
+    test_voxel = []
     test_labels = []
+    all_test_files = []
     class_map = {}
     folders = glob.glob(os.path.join(data_path, "[!README]*"))
 
@@ -36,19 +55,25 @@ def parse_dataset(data_path):
         test_files = glob.glob(os.path.join(folder, "test/*"))
 
         for f in train_files:
-            train_points.append(trimesh.load(f).voxelized(3))
+            #train_voxel.append(trimesh.load(f).voxelized(3))
+            print(f)
+            train_voxel.append(pv.voxelize(trimesh.load(f), 3, check_surface=False))
             train_labels.append(i)
 
         for f in test_files:
-            test_points.append(trimesh.load(f).voxelized(3))
+            print(f)
+            #test_voxel.append(trimesh.load(f).voxelized(3))
+            test_voxel.append(pv.voxelize(trimesh.load(f), 3, check_surface=False))
             test_labels.append(i)
+            all_test_files.append(f)
 
     return (
-        np.array(train_points),
-        np.array(test_points),
+        np.array(train_voxel),
+        np.array(test_voxel),
         np.array(train_labels),
         np.array(test_labels),
         class_map,
+        all_test_files
     )
     
 
@@ -99,7 +124,7 @@ def convert_sequential_model(classifier):
 
 def voxel_classifier():
     classifier = make_3Dclassifier_model()
-    classifier.build()
+    #classifier.build()
     classifier.pop() # Drop last Dense layer
     classifier.pop() # Drop last Reshape layer
     
@@ -125,10 +150,13 @@ def main():
     if not os.path.exists(voxel_model_path):
         os.makedirs(voxel_model_path)
     
-    classifier = voxel_classifier()
     #classifier.summary(print_fn=myprint)
     
-    train_voxel, test_voxel, train_labels, test_labels, class_map = parse_dataset(DATA_DIR)
+    train_voxel, test_voxel, train_labels, test_labels, class_map, test_files = parse_dataset(DATA_DIR)
+    classifier = voxel_classifier()
+    
+    #train_voxel, test_voxel, train_labels, test_labels, class_map = load_data()
+
     
     classifier.compile(
         optimizer = tf.keras.optimizers.Adam(LEARNING_RATE_CLASSIFIER),
@@ -156,7 +184,27 @@ def main():
         callbacks=[callbacks]
     )
     
-    save_plots(history, 'voxel') # Save loss and accuracy plots 
+    #save_plots(history, 'voxel') # Save loss and accuracy plots 
+    
+    #predictions = classifier.predict(test_voxel)
+    #np.savetxt("score_Voxel.csv", predictions, delimiter=",")
+    
+    preds = classifier.predict(test_voxel)
+    predictions_dict = {"file_name": [], "predictions": []}
+    
+    i = 0
+    for sample in test_files:
+        predictions_dict['file_name'].append(os.path.basename(sample))
+        predictions_dict['predictions'].append(preds[i].tolist())
+        i += 1
+    
+    
+    with open('voxelPred.json', 'w') as outfile:
+        json.dump(predictions_dict, outfile)
 
 if __name__ == "__main__":
     main()
+    
+    
+    
+    
