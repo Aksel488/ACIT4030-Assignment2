@@ -110,6 +110,6 @@ def save_plots(history, model_name):
     plt.xlabel('epoch')
     plt.savefig(f'{img_save_path}/{model_name}_loss.png')
     
-def myprint(s, model_name):
-    with open(f'{model_name}_summary.txt','a') as f:
+def myprint(s):
+    with open('classifier_summary.txt','a') as f:
         print(s, file=f)
