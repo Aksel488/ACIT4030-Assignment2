@@ -156,7 +156,7 @@ def main():
         callbacks=[callbacks]
     )
     
-    save_plots(history) # Save loss and accuracy plots 
+    save_plots(history, 'voxel') # Save loss and accuracy plots 
 
 if __name__ == "__main__":
     main()
