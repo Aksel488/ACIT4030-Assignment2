@@ -12,29 +12,13 @@ from tensorflow.keras.layers import (
     BatchNormalization, InputLayer, LeakyReLU, 
     Activation, Conv3D, Reshape,
 )
-from utils import save_plots, myprint, download_modelnet10
+from utils import save_plots, myprint, download_modelnet10, load_data
 
 
 LEARNING_RATE_CLASSIFIER = 1e-3
 BATCH_SIZE = 32
 EPOCHS = 10
 N_CLASSES = 10
-    
-    
-def load_data():
-    '''
-    function for loading data from the training data and returning it as a Dataset
-    '''
-    data = np.load("modelnet10.npz", allow_pickle=True)
-    train_voxel = data["train_voxel"] # Training 3D voxel samples
-    test_voxel = data["test_voxel"] # Test 3D voxel samples
-    train_labels = data["train_labels"] # Training labels (integers from 0 to 9)
-    test_labels = data["test_labels"] # Test labels (integers from 0 to 9)
-    class_map = data["class_map"] # Dictionary mapping the labels to their class names.
-    
-    return train_voxel, test_voxel, train_labels, test_labels, class_map
-
-
 
     
 def parse_dataset(data_path):
@@ -56,12 +40,10 @@ def parse_dataset(data_path):
 
         for f in train_files:
             #train_voxel.append(trimesh.load(f).voxelized(3))
-            print(f)
             train_voxel.append(pv.voxelize(trimesh.load(f), 3, check_surface=False))
             train_labels.append(i)
 
         for f in test_files:
-            print(f)
             #test_voxel.append(trimesh.load(f).voxelized(3))
             test_voxel.append(pv.voxelize(trimesh.load(f), 3, check_surface=False))
             test_labels.append(i)
@@ -152,10 +134,10 @@ def main():
     
     #classifier.summary(print_fn=myprint)
     
-    train_voxel, test_voxel, train_labels, test_labels, class_map, test_files = parse_dataset(DATA_DIR)
+    #train_voxel, test_voxel, train_labels, test_labels, class_map, test_files = parse_dataset(DATA_DIR)
     classifier = voxel_classifier()
     
-    #train_voxel, test_voxel, train_labels, test_labels, class_map = load_data()
+    train_voxel, test_voxel, train_labels, test_labels, class_map = load_data()
 
     
     classifier.compile(
@@ -190,17 +172,17 @@ def main():
     #np.savetxt("score_Voxel.csv", predictions, delimiter=",")
     
     preds = classifier.predict(test_voxel)
-    predictions_dict = {"file_name": [], "predictions": []}
+    # predictions_dict = {"file_name": [], "predictions": []}
     
-    i = 0
-    for sample in test_files:
-        predictions_dict['file_name'].append(os.path.basename(sample))
-        predictions_dict['predictions'].append(preds[i].tolist())
-        i += 1
+    # i = 0
+    # for sample in test_files:
+    #     predictions_dict['file_name'].append(os.path.basename(sample))
+    #     predictions_dict['predictions'].append(preds[i].tolist())
+    #     i += 1
     
     
     with open('voxelPred.json', 'w') as outfile:
-        json.dump(predictions_dict, outfile)
+        json.dump(preds.tolist(), outfile)
 
 if __name__ == "__main__":
     main()

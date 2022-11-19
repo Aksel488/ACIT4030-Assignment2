@@ -2,6 +2,9 @@ import os
 import trimesh
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import json
+import numpy as np 
+import pandas as pd
 
 def download_modelnet10():
     dataset_path = os.path.dirname(__file__)
@@ -113,3 +116,38 @@ def save_plots(history, model_name):
 def myprint(s):
     with open('classifier_summary.txt','a') as f:
         print(s, file=f)
+        
+        
+def load_data():
+    '''
+    function for loading data from the training data and returning it as a Dataset
+    '''
+    data = np.load("modelnet10.npz", allow_pickle=True)
+    train_voxel = data["train_voxel"] # Training 3D voxel samples
+    test_voxel = data["test_voxel"] # Test 3D voxel samples
+    train_labels = data["train_labels"] # Training labels (integers from 0 to 9)
+    test_labels = data["test_labels"] # Test labels (integers from 0 to 9)
+    class_map = data["class_map"] # Dictionary mapping the labels to their class names.
+    
+    return train_voxel, test_voxel, train_labels, test_labels, class_map        
+        
+
+        
+def ensemble_scores(voxel_pred_file, pointcloud_pred_file):
+    with open(voxel_pred_file) as f:
+        voxel_preds = pd.DataFrame(json.load(f))
+    
+    with open(pointcloud_pred_file) as f:
+        pointcloud_preds = pd.DataFrame(json.load(f))
+        
+    pointcloud_pred2 = pointcloud_preds['predictions']
+    
+    voxel_preds = voxel_preds.to_numpy()
+    pointcloud_pred2 = pointcloud_pred2.to_numpy()
+    
+    final_pred = []
+    for i in range(len(voxel_preds)):
+        #final_pred.append((voxel_preds[i] + np.array(pointcloud_pred2[i])) / 2)
+        final_pred.append(np.add(voxel_preds[i], np.array(pointcloud_pred2[i])) / 2)
+        
+    return final_pred, pointcloud_preds, voxel_preds
