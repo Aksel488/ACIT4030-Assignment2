@@ -33,6 +33,14 @@ print(accuracy_score(test_labels, np.argmax(voxel_scores, axis=-1)))
 plt.figure(figsize=(12,8))
 custom_confusion_matrix(test_labels, np.argmax(scores, axis=-1))
 plt.savefig('confusion.png', bbox_inches='tight')
-plt.show()
+plt.clf()
+
+custom_confusion_matrix(test_labels, np.argmax(np.array(pointnet_scores), axis=-1))
+plt.savefig('confusionPointNet.png', bbox_inches='tight')
+plt.clf()
+
+custom_confusion_matrix(test_labels, np.argmax(voxel_scores, axis=-1))
+plt.savefig('confusionVoxel.png', bbox_inches='tight')
+
 
 
