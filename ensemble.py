@@ -27,12 +27,12 @@ _, _, _, test_labels, _ = load_data()
 scores, pointnet_scores, voxel_scores = ensemble_scores('voxelPred.json', 'pointPred.json')
 
 print(accuracy_score(test_labels, np.argmax(scores, axis=-1)))
+print(accuracy_score(test_labels, np.argmax(np.array(pointnet_scores), axis=-1)))
+print(accuracy_score(test_labels, np.argmax(voxel_scores, axis=-1)))
 
-
-#print(accuracy_score(test_labels, np.argmax(pointnet_scores, axis=-1)))
-#print(accuracy_score(test_labels, np.argmax(voxel_scores, axis=-1)))
-
+plt.figure(figsize=(12,8))
 custom_confusion_matrix(test_labels, np.argmax(scores, axis=-1))
+plt.savefig('confusion.png', bbox_inches='tight')
 plt.show()
 
 

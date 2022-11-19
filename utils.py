@@ -147,7 +147,10 @@ def ensemble_scores(voxel_pred_file, pointcloud_pred_file):
     
     final_pred = []
     for i in range(len(voxel_preds)):
-        #final_pred.append((voxel_preds[i] + np.array(pointcloud_pred2[i])) / 2)
-        final_pred.append(np.add(voxel_preds[i], np.array(pointcloud_pred2[i])) / 2)
+        pointcloud_pred2[i] = np.array(pointcloud_pred2[i])
+        final_pred.append(np.add(voxel_preds[i], pointcloud_pred2[i]) / 2)
         
-    return final_pred, pointcloud_preds, voxel_preds
+    pointcloud_pred2 = np.concatenate(pointcloud_pred2)
+    pointcloud_pred2 = np.reshape(pointcloud_pred2, (908, 10))
+        
+    return final_pred, pointcloud_pred2, voxel_preds
