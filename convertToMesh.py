@@ -1,11 +1,17 @@
 import os, shutil
 import pymeshlab
-import trimesh
+from utils import show_mesh, download_modelnet10
 
 '''
 pymeshlab documentation:
 https://pymeshlab.readthedocs.io/en/latest/filter_list.html
 '''
+
+def download_modelnet():
+    path_here = os.path.dirname(__file__)
+    DATA_DIR = os.path.join(path_here, 'datasets/ModelNet10')
+    if not os.path.isdir(DATA_DIR):
+        DATA_DIR = download_modelnet10()
 
 def convert_modelnet_off_obj():
     '''
@@ -247,8 +253,7 @@ if __name__ == '__main__':
     '''
     show the object in PATH
     '''
-    # mesh = trimesh.load(PATH)
-    # mesh.show()
+    # show_mesh(PATH)
 
 
 
