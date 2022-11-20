@@ -13,12 +13,13 @@ conda activate tf-gpu
 ```
 Then install the rest of the packages.
 ```bash
-pip install trimesh
 pip install numpy
+pip install pyglet
+pip install trimesh
+pip install matplotlib
+pip install pymeshlab
 pip install pandas
 pip install pyvista
-pip install matplotlib
-pip install pyglet
 pip install seaborn
 pip install json
 ```

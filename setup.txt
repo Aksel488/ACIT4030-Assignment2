@@ -8,5 +8,8 @@ pip install numpy
 pip install pyglet
 pip install trimesh
 pip install matplotlib
-pip install 
-pip install 
+pip install pymeshlab
+pip install pandas
+pip install pyvista
+pip install seaborn
+pip install json
