@@ -28,6 +28,15 @@ pip install json
 The folder containing the objects of ModelNet10 is not included. They will be stored in the cache once the kode has been ran.
 
 
+### MeshCNN
+To run the MeshCNN, you will have to speratly clone their repository. 
+```bash
+git clone https://github.com/ranahanocka/MeshCNN.git
+cd MeshCNN
+```
+Running the convertToMesh.py file, will produce a seperate folder of .obj files. This folder can be copied over to the dataset folder in the MeshCNN repository.
+
+
 ### Running
 Main code for training the individual models can be found in the files pointnet.py and voxelCNN.py. These files will generate two json files with each of their predictions.
 To create the ensemble predictions, run ensemble.py. 
